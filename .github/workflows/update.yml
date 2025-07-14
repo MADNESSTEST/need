@@ -35,6 +35,9 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           
+          # Pull latest changes first
+          git pull origin main
+          
           # Check if files exist before adding them
           if [ -f "secret.txt" ]; then
             git add secret.txt
@@ -55,6 +58,19 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "Update LootLabs link - $(date)"
-            git push
-            echo "Changes committed and pushed"
+            
+            # Try to push, with retry logic
+            for i in {1..3}; do
+              if git push; then
+                echo "Changes committed and pushed successfully"
+                break
+              else
+                echo "Push failed, attempt $i/3. Pulling and retrying..."
+                git pull origin main --rebase
+                if [ $i -eq 3 ]; then
+                  echo "Failed to push after 3 attempts"
+                  exit 1
+                fi
+              fi
+            done
           fi
