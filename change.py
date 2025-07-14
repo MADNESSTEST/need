@@ -162,13 +162,8 @@ class LootLabsGenerator:
             print(f"🔗 Original URL: {final_url}")
             print(f"🔑 Key: {key_content}")
             
-            # Create anti-bypass link (optional - you can customize the destination)
-            # Example: redirect to a different URL for anti-bypass
-            alternative_url = "https://example.com/alternative-destination"  # Change this as needed
-            anti_bypass_url = self.create_anti_bypass_link(loot_url, alternative_url)
-            
-            if anti_bypass_url:
-                print(f"🛡️ Anti-bypass link: {anti_bypass_url}")
+            # Anti-bypass functionality removed - not needed for this use case
+            anti_bypass_url = None
             
             print(f"💾 Saved to secret.txt")
             
