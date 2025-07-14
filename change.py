@@ -168,29 +168,17 @@ class LootLabsGenerator:
             print(f"💾 Saved to secret.txt")
             
             # Save to file
-            self.save_link_info(loot_url, final_url, key_content, anti_bypass_url)
+            self.save_link_info(loot_url)
             return loot_url
         else:
             print("❌ Failed to generate LootLabs link")
             return None
     
-    def save_link_info(self, loot_url, original_url, key, anti_bypass_url=None):
+    def save_link_info(self, loot_url):
         """Save generated link info to file"""
         # Save just the URL to secret.txt (as requested)
         with open("secret.txt", "w") as f:
             f.write(loot_url)
-        
-        # Also save detailed info to JSON for reference
-        info = {
-            "generated_at": datetime.now().isoformat(),
-            "loot_url": loot_url,
-            "original_url": original_url,
-            "key": key,
-            "anti_bypass_url": anti_bypass_url
-        }
-        
-        with open("lootlabs_links.json", "w") as f:
-            json.dump(info, f, indent=2)
 
 def get_latest_gist_commit_hash(gist_id):
     """Function to get the latest commit hash of a Gist"""
