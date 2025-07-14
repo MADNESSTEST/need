@@ -8,8 +8,76 @@ class LootLabsGenerator:
     def __init__(self, api_token):
         self.api_token = api_token
         self.base_url = "https://creators.lootlabs.gg/api/public/content_locker"
+        self.encryptor_url = "https://creators.lootlabs.gg/api/public/url_encryptor"
         
+    def encrypt_url(self, destination_url, use_get=False):
+        """Encrypt a URL for use with the &data parameter (anti-bypass)"""
+        if use_get:
+            # GET request method
+            params = {
+                'destination_url': destination_url,
+                'api_token': self.api_token
+            }
+            try:
+                response = requests.get(self.encryptor_url, params=params)
+                response.raise_for_status()
+                result = response.json()
+                
+                if result.get("type") == "fetched":
+                    return result.get("message")
+                else:
+                    print(f"Encryption failed: {result.get('message', 'Unknown error')}")
+                    return None
+    
     def get_github_content(self, raw_url):
+                    
+            except requests.RequestException as e:
+                print(f"Encryption request failed: {e}")
+                return None
+        else:
+            # POST request method
+            headers = {
+                "Authorization": f"Bearer {self.api_token}",
+                "Content-Type": "application/json"
+            }
+            
+            data = {
+                "destination_url": destination_url
+            }
+            
+            try:
+                response = requests.post(self.encryptor_url, headers=headers, json=data)
+                response.raise_for_status()
+                result = response.json()
+                
+                if result.get("type") == "created":
+                    return result.get("message")
+                else:
+                    print(f"Encryption failed: {result.get('message', 'Unknown error')}")
+                    return None
+                    
+            except requests.RequestException as e:
+                print(f"Encryption request failed: {e}")
+                return None
+    
+    def create_anti_bypass_link(self, base_loot_url, new_destination_url):
+        """Create an anti-bypass link by encrypting a new destination URL"""
+        encrypted_data = self.encrypt_url(new_destination_url)
+        
+        if encrypted_data:
+            # Extract the short code from the base URL
+            # e.g., https://loot-link.com/s?XiBpFlWo -> XiBpFlWo
+            if "loot-link.com/s?" in base_loot_url or "lootdest.org/s?" in base_loot_url:
+                short_code = base_loot_url.split("?")[-1]
+                domain = "loot-link.com" if "loot-link.com" in base_loot_url else "lootdest.org"
+                anti_bypass_url = f"https://{domain}/s?{short_code}&data={encrypted_data}"
+                return anti_bypass_url
+            else:
+                print("Invalid LootLabs URL format")
+                return None
+        else:
+            print("Failed to encrypt destination URL")
+            return None
         """Fetch content from GitHub raw URL"""
         try:
             response = requests.get(raw_url)
@@ -94,16 +162,25 @@ class LootLabsGenerator:
             print(f"✅ Generated LootLabs link: {loot_url}")
             print(f"🔗 Original URL: {final_url}")
             print(f"🔑 Key: {key_content}")
+            
+            # Create anti-bypass link (optional - you can customize the destination)
+            # Example: redirect to a different URL for anti-bypass
+            alternative_url = "https://example.com/alternative-destination"  # Change this as needed
+            anti_bypass_url = self.create_anti_bypass_link(loot_url, alternative_url)
+            
+            if anti_bypass_url:
+                print(f"🛡️ Anti-bypass link: {anti_bypass_url}")
+            
             print(f"💾 Saved to secret.txt")
             
             # Save to file
-            self.save_link_info(loot_url, final_url, key_content)
+            self.save_link_info(loot_url, final_url, key_content, anti_bypass_url)
             return loot_url
         else:
             print("❌ Failed to generate LootLabs link")
             return None
     
-    def save_link_info(self, loot_url, original_url, key):
+    def save_link_info(self, loot_url, original_url, key, anti_bypass_url=None):
         """Save generated link info to file"""
         # Save just the URL to secret.txt (as requested)
         with open("secret.txt", "w") as f:
@@ -114,7 +191,8 @@ class LootLabsGenerator:
             "generated_at": datetime.now().isoformat(),
             "loot_url": loot_url,
             "original_url": original_url,
-            "key": key
+            "key": key,
+            "anti_bypass_url": anti_bypass_url
         }
         
         with open("lootlabs_links.json", "w") as f:
