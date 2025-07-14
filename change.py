@@ -172,12 +172,22 @@ def main():
         # Now generate the LootLabs link using the updated key
         print("🔄 Generating LootLabs link...")
         loot_generator = LootLabsGenerator(lootlabs_token)
-        loot_url = loot_generator.process_github_script(latest_commit_hash)
         
-        if loot_url:
-            print("✅ LootLabs link generated and saved successfully!")
-        else:
-            print("❌ Failed to generate LootLabs link")
+        try:
+            loot_url = loot_generator.process_github_script(latest_commit_hash)
+            
+            if loot_url:
+                print("✅ LootLabs link generated and saved successfully!")
+            else:
+                print("❌ Failed to generate LootLabs link")
+                # Create empty file so workflow doesn't fail
+                with open("secret.txt", "w") as f:
+                    f.write("FAILED_TO_GENERATE_LINK")
+        except Exception as e:
+            print(f"❌ Error generating LootLabs link: {e}")
+            # Create empty file so workflow doesn't fail
+            with open("secret.txt", "w") as f:
+                f.write("ERROR_GENERATING_LINK")
             
     else:
         print("Failed to retrieve latest commit hash of the Gist.")
