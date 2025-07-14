@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.DEV_KEY }}
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -27,13 +29,32 @@ jobs:
       - name: Update new.txt and generate LootLabs link
         run: |
           python change.py ${{ secrets.DEV_KEY }} ${{ secrets.GIST_ID }} ${{ secrets.LOOTLABS_TOKEN }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Commit and push changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add secret.txt lootlabs_links.json
-          git diff --staged --quiet || git commit -m "Update LootLabs link"
-          git push
+          
+          # Check if files exist before adding them
+          if [ -f "secret.txt" ]; then
+            git add secret.txt
+            echo "Added secret.txt"
+          else
+            echo "secret.txt not found, skipping"
+          fi
+          
+          if [ -f "lootlabs_links.json" ]; then
+            git add lootlabs_links.json
+            echo "Added lootlabs_links.json"
+          else
+            echo "lootlabs_links.json not found, skipping"
+          fi
+          
+          # Only commit if there are changes
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update LootLabs link - $(date)"
+            git push
+            echo "Changes committed and pushed"
+          fi
