@@ -45,9 +45,19 @@ class LootLabsGenerator:
             # Handle different response formats
             if isinstance(result, dict):
                 if result.get("type") == "created":
-                    return result["message"]["loot_url"]
+                    # Handle case where message is a list
+                    message = result.get("message")
+                    if isinstance(message, list) and len(message) > 0:
+                        return message[0]["loot_url"]
+                    elif isinstance(message, dict):
+                        return message["loot_url"]
                 elif result.get("type") == "fetch":
-                    return result["message"]["loot_url"]
+                    # Handle case where message is a list
+                    message = result.get("message")
+                    if isinstance(message, list) and len(message) > 0:
+                        return message[0]["loot_url"]
+                    elif isinstance(message, dict):
+                        return message["loot_url"]
                 else:
                     print(f"Error: {result.get('message', 'Unknown error')}")
                     return None
