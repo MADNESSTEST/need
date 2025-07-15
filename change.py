@@ -86,7 +86,7 @@ class LootLabsGenerator:
             print("Failed to encrypt destination URL")
             return None
     
-    def generate_lootlabs_link(self, title, final_url, tier_id=1, tasks=3, theme=3):
+    def generate_lootlabs_link(self, title, final_url, tier_id=2, tasks=5, theme=3):
         """Generate LootLabs link via API"""
         headers = {
             "Authorization": f"Bearer {self.api_token}",
@@ -148,12 +148,12 @@ class LootLabsGenerator:
         # Step 1: Construct the final URL using the key from new.txt
         final_url = f"https://gist.githubusercontent.com/MADNESSTEST/d68fc1ce7ea72159553b21b769a4be1c/raw/{key_content}/key"
         
-        # Step 2: Generate LootLabs link
+        # Step 2: Generate LootLabs link with your preferred settings
         loot_url = self.generate_lootlabs_link(
             title="Script Key Access",
             final_url=final_url,
-            tier_id=1,
-            tasks=3,
+            tier_id=2,  # Maximum Profit and Software Products tier
+            tasks=5,    # 5 tasks as requested
             theme=3
         )
         
