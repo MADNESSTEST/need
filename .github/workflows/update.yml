@@ -1,7 +1,7 @@
 name: Update new.txt and Generate LootLabs Link
 on:
   schedule:
-    - cron: '55 15 * * *'  # Fixed: was '55 15 * **'
+    - cron: '59 15 * * *'  # Fixed: was '55 15 * **'
   workflow_dispatch:  # Allow manual triggering
 jobs:
   update_file:
